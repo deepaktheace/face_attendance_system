@@ -12,6 +12,7 @@ def return_camera_index():
                 cap.release()
             Index += 1
             i -= 1
+            print(arr)
 while True:
     return_camera_index()
     print(return_camera_index(),'\n')
