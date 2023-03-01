@@ -19,7 +19,7 @@ bucket = storage.bucket()
 cap = cv.VideoCapture(1)
 cap.set(3,640)
 cap.set(4,480)
-sleep(3)
+sleep(5)
 print(cap.read())
 
 background = cv.imread('Resources/background.png')
@@ -60,7 +60,7 @@ encodeListKnownWithIds = pickle.load(file)
 file.close()
 encodeListKnown,studentIds = encodeListKnownWithIds
 #print(studentIds)
-
+print(encodeListKnown)
 modeType = 0
 counter = 0
 id = 0
@@ -83,14 +83,17 @@ while True:
     for encodeFace, FaceLoc in zip(encodeCurFrame, faceCurFrame):
         matches = face_recognition.compare_faces(encodeListKnown, encodeFace)
         faceDis = face_recognition.face_distance(encodeListKnown, encodeFace)
+        print(faceDis)
+        y1, x2, y2, x1 = FaceLoc
+        y1, x2, y2, x1 = y1*4 , x2*4, y2*4, x1*4
+        bbox = 55+x1, 162+y1, x2-x1, y2-y1 
+        background = cornerRect(background,bbox, rt=0)
         matchIndex =  np.argmin(faceDis) if np.argmin(faceDis) < 0.5 else 1
-        
+        print(matches[matchIndex])
         if matches[matchIndex]:
-            y1, x2, y2, x1 = FaceLoc
-            y1, x2, y2, x1 = y1*4 , x2*4, y2*4, x1*4
-            bbox = 55+x1, 162+y1, x2-x1, y2-y1 
-            background = cornerRect(background,bbox, rt=0)
             id = studentIds[matchIndex]
+            print('checked')
+            print(id)
             if counter == 0: 
                 counter = 1
     if counter!= 0:
@@ -103,10 +106,11 @@ while True:
             imgStudent = cv.imdecode(array,cv.COLOR_BGRA2BGR)
             imgStudent = maintain_aspect_ratio_resize(imgStudent,216,216)
             #update data
-            dateTimeObject = datetime.strptime(studentInfo['last_attendance'],"%Y-%m-%d %H:%M:%S")
+            '''dateTimeObject = datetime.strptime(studentInfo['last_attendance'],"%Y-%m-%d %H:%M:%S")
             secondsElapsed = (datetime.now()-dateTimeObject).total_seconds()
-            print(secondsElapsed)
+            print(secondsElapsed)'''
             ref = db.reference(f'Students/{id}')
+            studentInfo['total_attendance'] = int(studentInfo['total_attendance'])
             studentInfo['total_attendance'] += 1
             ref.child('total_attendance').set(studentInfo['total_attendance'])
         

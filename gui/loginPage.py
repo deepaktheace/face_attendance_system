@@ -5,7 +5,7 @@ customtkinter.set_appearance_mode("dark") #can set light or dark.
 customtkinter.set_default_color_theme("green") #themes: blue, dark-blue or green
 app=customtkinter.CTk() #creating custom tkinter window
 app.geometry("1280x720")
-app.title('Login')
+app.title('Attendance System - Login')
 img1=ImageTk.PhotoImage (Image.open("Resources/pattern.png"))
 l1=customtkinter.CTkLabel(master=app, image=img1)
 l1.pack()
@@ -18,7 +18,6 @@ def button_function():
     l1=customtkinter.CTkLabel(master=w, text="Home Page",font=('Century Gothic',60))
     l1.place(relx=0.5, rely=0.5,  anchor=tkinter.CENTER)
     w.mainloop()
-    
 
 frame=customtkinter.CTkFrame (master=l1, width=320, height=360)
 frame.place(relx=0.5, rely=0.5, anchor= tkinter.CENTER)
