@@ -119,6 +119,9 @@ class App(customtkinter.CTk):
             self.about_us_frame.grid_forget()
 
     def home_button_event(self):
+        print("pressed")
+        from subprocess import call
+        call(["python","gui/loginPage.py"])
         self.select_frame_by_name("home")
 
     def frame_2_button_event(self):

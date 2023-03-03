@@ -59,8 +59,6 @@ file  = open('EncodeFile.p','rb')
 encodeListKnownWithIds = pickle.load(file)
 file.close()
 encodeListKnown,studentIds = encodeListKnownWithIds
-#print(studentIds)
-print(encodeListKnown)
 modeType = 0
 counter = 0
 id = 0
@@ -79,75 +77,84 @@ while True:
     #setting up background
     background[162:162+480,55:55+640] = img
     background[44:44+633,808:808+414] = modeList[modeType]
+    
+    if faceCurFrame:
+        for encodeFace, FaceLoc in zip(encodeCurFrame, faceCurFrame):
+            matches = face_recognition.compare_faces(encodeListKnown, encodeFace)
+            faceDis = face_recognition.face_distance(encodeListKnown, encodeFace)
+            y1, x2, y2, x1 = FaceLoc
+            y1, x2, y2, x1 = y1*4 , x2*4, y2*4, x1*4
+            bbox = 55+x1, 162+y1, x2-x1, y2-y1 
+            background = cornerRect(background,bbox, rt=0)
+            print(faceDis)
+            matchIndex =  np.argmin(faceDis) if np.argmin(faceDis) < 0.5 else 1
+            if matches[matchIndex] != True:
+                print("Unknown Face Detected")
+            if matches[matchIndex]:
+                id = studentIds[matchIndex]
+                if counter == 0: 
+                    counter = 1
+        if counter!= 0:
+            # Getting Data
+            if counter == 1:
+                studentInfo = db.reference(f'Students/{id}').get()
+                print(studentInfo) 
+                blob = bucket.get_blob(f'Images/{id}.png')
+                array = np.frombuffer(blob.download_as_string(),np.uint8)
+                imgStudent = cv.imdecode(array,cv.COLOR_BGRA2BGR)
+                imgStudent = maintain_aspect_ratio_resize(imgStudent,216,216)
+                #update data
+                dateTimeObject = datetime.strptime(studentInfo['last_attendance_time'],"%Y-%m-%d %H:%M:%S")
+                secondsElapsed = (datetime.now()-dateTimeObject).total_seconds()
+                if secondsElapsed >= 39600: 
+                    ref = db.reference(f'Students/{id}')
+                    studentInfo['total_attendance'] = int(studentInfo['total_attendance'])
+                    studentInfo['total_attendance'] += 1
+                    ref.child('total_attendance').set(studentInfo['total_attendance'])
+                    ref.child('last_attendance_time').set(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                else:
+                    modeType = 3
+                    counter = 0
+                    background[44:44+633,808:808+414] = modeList[modeType]
 
-    for encodeFace, FaceLoc in zip(encodeCurFrame, faceCurFrame):
-        matches = face_recognition.compare_faces(encodeListKnown, encodeFace)
-        faceDis = face_recognition.face_distance(encodeListKnown, encodeFace)
-        print(faceDis)
-        y1, x2, y2, x1 = FaceLoc
-        y1, x2, y2, x1 = y1*4 , x2*4, y2*4, x1*4
-        bbox = 55+x1, 162+y1, x2-x1, y2-y1 
-        background = cornerRect(background,bbox, rt=0)
-        matchIndex =  np.argmin(faceDis) if np.argmin(faceDis) < 0.5 else 1
-        print(matches[matchIndex])
-        if matches[matchIndex]:
-            id = studentIds[matchIndex]
-            print('checked')
-            print(id)
-            if counter == 0: 
-                counter = 1
-    if counter!= 0:
-        # Getting Data
-        if counter == 1:
-            studentInfo = db.reference(f'Students/{id}').get()
-            print(studentInfo) 
-            blob = bucket.get_blob(f'Images/{id}.png')
-            array = np.frombuffer(blob.download_as_string(),np.uint8)
-            imgStudent = cv.imdecode(array,cv.COLOR_BGRA2BGR)
-            imgStudent = maintain_aspect_ratio_resize(imgStudent,216,216)
-            #update data
-            '''dateTimeObject = datetime.strptime(studentInfo['last_attendance'],"%Y-%m-%d %H:%M:%S")
-            secondsElapsed = (datetime.now()-dateTimeObject).total_seconds()
-            print(secondsElapsed)'''
-            ref = db.reference(f'Students/{id}')
-            studentInfo['total_attendance'] = int(studentInfo['total_attendance'])
-            studentInfo['total_attendance'] += 1
-            ref.child('total_attendance').set(studentInfo['total_attendance'])
-        
-        if 26<counter<36:
-            modeType = 2
-            background[44:44+633,808:808+414] = modeList[modeType]
+            if modeType != 3:
+                
+                if 26<counter<36:
+                    modeType = 2
+                    background[44:44+633,808:808+414] = modeList[modeType]
 
-        if 10<counter<25:   
-            modeType = 1
-            cv.putText(background,str(studentInfo['total_attendance']),(861,125),
-                    cv.FONT_HERSHEY_COMPLEX,1,(255,255,255),1)
-            cv.putText(background,str(studentInfo['stream']),(1006,550),
-                    cv.FONT_HERSHEY_COMPLEX,0.5,(255,255,255),1)
-            cv.putText(background,str(id),(1006,493),
-                    cv.FONT_HERSHEY_COMPLEX,0.5,(255,255,255),1)
-            cv.putText(background,str(studentInfo['div']),(910,625),
-                    cv.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
-            cv.putText(background,str(studentInfo['year']),(1025,625),
-                    cv.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
-            cv.putText(background,str(studentInfo['starting_year']),(1125,625),
-                    cv.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
+                if 10<counter<25:   
+                    modeType = 1
+                    cv.putText(background,str(studentInfo['total_attendance']),(861,125),
+                            cv.FONT_HERSHEY_COMPLEX,1,(255,255,255),1)
+                    cv.putText(background,str(studentInfo['stream']),(1006,550),
+                            cv.FONT_HERSHEY_COMPLEX,0.5,(255,255,255),1)
+                    cv.putText(background,str(id),(1006,493),
+                            cv.FONT_HERSHEY_COMPLEX,0.5,(255,255,255),1)
+                    cv.putText(background,str(studentInfo['div']),(910,625),
+                            cv.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
+                    cv.putText(background,str(studentInfo['year']),(1025,625),
+                            cv.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
+                    cv.putText(background,str(studentInfo['starting_year']),(1125,625),
+                            cv.FONT_HERSHEY_COMPLEX,0.6,(100,100,100),1)
 
-            (w, h), _ = cv.getTextSize(studentInfo['name'], cv.FONT_HERSHEY_COMPLEX,1,1)
-            offset  = (414 - w)//2
-            cv.putText(background,str(studentInfo['name']),(808+offset,445),
-                    cv.FONT_HERSHEY_COMPLEX,1,(50,50,50),1)
-            background[175:175+216,909:909+216] = imgStudent
-        
-        counter+=1
-
-        if counter>=36:
-            counter = 0
-            modeType = 0
-            studentInfo = []
-            imgStudent = []
-            background[44:44+633,808:808+414] = modeList[modeType]
+                    (w, h), _ = cv.getTextSize(studentInfo['name'], cv.FONT_HERSHEY_COMPLEX,1,1)
+                    offset  = (414 - w)//2
+                    cv.putText(background,str(studentInfo['name']),(808+offset,445),
+                            cv.FONT_HERSHEY_COMPLEX,1,(50,50,50),1)
+                    background[175:175+216,909:909+216] = imgStudent
             
+                counter+=1
+
+                if counter>36:
+                    counter = 0
+                    modeType = 0
+                    studentInfo = []
+                    imgStudent = []
+                    background[44:44+633,808:808+414] = modeList[modeType]
+    else:
+        modeType = 0
+        counter = 0        
 
     cv.imshow("face_recognition",background)
     if cv.waitKey(1) == ord('q'):
