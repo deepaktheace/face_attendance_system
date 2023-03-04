@@ -21,7 +21,7 @@ def button_function(userName,password):
     usrName =userName.get()
     passWord=password.get()
     if usrName == "admin" and passWord == "12345":
-        cmd = "python crud/examples/image_example.py"
+        cmd = "python crud/image_example.py"
         p = subprocess.Popen(cmd, shell=True)
         app.destroy()
     else:

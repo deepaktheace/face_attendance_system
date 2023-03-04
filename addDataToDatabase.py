@@ -29,7 +29,7 @@ data = {
     },
     "783523":{
         "name":"Mohit Garude",
-        "stream":"BCA",
+        "stream":"WEB DEVELOPMENT",
         "starting_year":"2020",
         "total_attendance":"20",
         "div":"B",
@@ -38,7 +38,7 @@ data = {
     },
     "100234":{
         "name":"Deepak Gupta",
-        "stream":"BCA",
+        "stream":"A.I.",
         "starting_year":"2020",
         "total_attendance":"6",
         "div":"B",

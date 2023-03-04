@@ -4,4 +4,5 @@ numpy
 pickle
 cvzone
 firebase-admin
+tkinter
 customtkinter
