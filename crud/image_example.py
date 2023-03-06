@@ -144,12 +144,12 @@ class App(customtkinter.CTk):
         roll_number = customtkinter.CTkLabel(master=self.crud_frame_1, text="Roll Number : ",font=('Century Gothic',20))
         roll_number.place(x=10, y=25)
         roll_number = StringVar()
-        roll_number_value = customtkinter.CTkEntry(master=self.crud_frame_1, width=220, placeholder_text='Username', textvariable=roll_number)
+        roll_number_value = customtkinter.CTkEntry(master=self.crud_frame_1, width=220, textvariable=roll_number)
         roll_number_value.place(x=150, y=25)
         name = customtkinter.CTkLabel(master=self.crud_frame_1, text="Name : ",font=('Century Gothic',20))
         name.place(x=440, y=25)
         name = StringVar()
-        name_value = customtkinter.CTkEntry(master=self.crud_frame_1, width=220, placeholder_text='Username', textvariable=name)
+        name_value = customtkinter.CTkEntry(master=self.crud_frame_1, width=220, textvariable=name)
         name_value.place(x=550, y=25)
         major = customtkinter.CTkLabel(master=self.crud_frame_1, text="Major : ",font=('Century Gothic',20))
         major.place(x=10, y=80)
@@ -181,30 +181,59 @@ class App(customtkinter.CTk):
             if(roll_number.get()=="" or name.get()=="" or majormenu.get()=="major" or starting_yearmenu.get()=="Starting Year" or divmenu.get()==" Div" or current_yearmenu.get()=="Current Year"):
                 messagebox.showerror(title="Error", message="Please Enter All The Data.")
             else:
-                print(roll_number.get() ,name.get() ,majormenu.get() ,starting_yearmenu.get() ,divmenu.get() ,current_yearmenu.get())
+                cur_time = f"{datetime.now()}"
+                cur_time = cur_time.split(".")
+                cur_time = cur_time[0]
+                data = {
+                        f"{roll_number.get()}":{
+                        "name": f"{name.get()}",
+                        "stream": f"{majormenu.get()}",
+                        "starting_year":f"{starting_yearmenu.get()}",
+                        "total_attendance":"0",
+                        "div":f"{divmenu.get()}",
+                        "year":f"{current_yearmenu.get()}",
+                        "last_attendance_time":f"{cur_time}",
+                    }
+                }
+                for key, value in data.items():
+                    ref.child(key).set(value)
+                print(roll_number.get() ,name.get() ,majormenu.get() ,starting_yearmenu.get() ,divmenu.get() ,current_yearmenu.get(),cur_time)
                 messagebox.showinfo(title="Inserted", message="Data inserted Successfully !")
+                clear_data()
         get_data = partial(get_data,roll_number,name,majormenu,starting_yearmenu,divmenu,current_yearmenu)
 
         def clear_data(roll_number_value,name_value,majormenu,starting_yearmenu,divmenu,current_yearmenu):
             roll_number_value.delete(0,END)
             name_value.delete(0,END)
-            majormenu.set("major")
+            majormenu.set("Major")
             starting_yearmenu.set("Starting Year") 
             divmenu.set("  Div")
             current_yearmenu.set("Current Year")
         clear_data = partial(clear_data,roll_number_value,name_value,majormenu,starting_yearmenu,divmenu,current_yearmenu)
 
-        def delete_data(roll_number_value):
-            ref.child("234910").delete()
+        def delete_data(roll_number):
+            print(roll_number.get())
+            if(roll_number_value.get()==""):
+                messagebox.showerror(title="Error", message="Please Enter a valid Roll Number")
+            else:
+                ref.child(f"{roll_number.get()}").delete()
+                messagebox.showinfo(title="Deleted", message="Data Deleted Successfully !")
+                clear_data()
+            pass
+        delete_data = partial(delete_data,roll_number_value)
+
+        def update_data(roll_number_value,name_value,majormenu,starting_yearmenu,divmenu,current_yearmenu):
+            ref.child(f"{roll_number_value}").child(f"{name}")
             pass
 
+        clear_data = partial(clear_data,roll_number_value,name_value,majormenu,starting_yearmenu,divmenu,current_yearmenu)
         save_button=customtkinter.CTkButton(self.crud_frame_1,command=get_data, text="Save", font=('Century Gothic',15), fg_color="#0e9104",hover_color="#034a05", corner_radius=20,width=120, height=35, cursor="hand2")
         save_button.place(x=820, y=55)
-        update_button=customtkinter.CTkButton(self.crud_frame_1, text="Update", font=('Century Gothic',15), fg_color="#f09b46", hover_color="#b35b04", corner_radius=20,width=122, height=35, cursor="hand2")
+        update_button=customtkinter.CTkButton(self.crud_frame_1, command=update_data, text="Update", font=('Century Gothic',15), fg_color="#f09b46", hover_color="#b35b04", corner_radius=20,width=122, height=35, cursor="hand2")
         update_button.place(x=950,y=55)
-        clear_button=customtkinter.CTkButton(self.crud_frame_1,command=clear_data, text="Clear", font=('Century Gothic',15), fg_color="#f054c4", hover_color="#7a0259", corner_radius=20,width=120, height=35, cursor="hand2")
+        clear_button=customtkinter.CTkButton(self.crud_frame_1, command=clear_data, text="Clear", font=('Century Gothic',15), fg_color="#f054c4", hover_color="#7a0259", corner_radius=20,width=120, height=35, cursor="hand2")
         clear_button.place(x=820, y=125)
-        delete_button=customtkinter.CTkButton(self.crud_frame_1, text="Delete", font=('Century Gothic',15), fg_color="#fa4356", hover_color="#960010",corner_radius=20,width=120, height=35, cursor="hand2")
+        delete_button=customtkinter.CTkButton(self.crud_frame_1, command=delete_data, text="Delete", font=('Century Gothic',15), fg_color="#fa4356", hover_color="#960010",corner_radius=20,width=120, height=35, cursor="hand2")
         delete_button.place(x=950, y=125)
 
         # select default frame

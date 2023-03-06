@@ -5,14 +5,14 @@ import ttkbootstrap as ttk
 from tkinter import *
 from firebase_admin import credentials,db,initialize_app
 import firebase_admin
-import json
+from datetime import datetime
 cred = credentials.Certificate("serviceAccountKey.json")
 initialize_app(cred,{
     'databaseURL':"https://realtimefaceattendance-53e9b-default-rtdb.firebaseio.com/"
 })
 
 ref = db.reference('Students')
-
+'''
 data = {
         "234910":{
         "name":"Raj Shah demo",
@@ -24,7 +24,10 @@ data = {
         "last_attendance_time":"2023-02-25 00:54:23",
     }
 }
-
 for key, value in data.items():
     ref.child(key).set(value)
+'''
 
+roll = 234910
+name = "Raj Shah demo"
+print(ref.child(f"{roll}").child(f"{name}").update("update"))
