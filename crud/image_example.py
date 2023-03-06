@@ -1,15 +1,27 @@
 import customtkinter
 import os
 from tkinter import *
-from tkinter import messagebox
+from tkinter import messagebox,ttk
 from PIL import Image
+from firebase_admin import credentials,db,storage,initialize_app
+from datetime import datetime
+from functools import partial
+
+#FireBase DataBase Connection
+cred = credentials.Certificate("serviceAccountKey.json")
+initialize_app(cred,{
+    'databaseURL':"https://realtimefaceattendance-53e9b-default-rtdb.firebaseio.com/",
+    'storageBucket':'realtimefaceattendance-53e9b.appspot.com',
+})
+ref = db.reference('Students')
+
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
 
         self.title("Smart Attendance System")
-        self.geometry("1450x700")
-
+        self.geometry("1280x600")
+        
         # set grid layout 1x2
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
@@ -41,10 +53,10 @@ class App(customtkinter.CTk):
                                                    image=self.home_image, anchor="w", command=self.home_button_event)
         self.home_button.grid(row=1, column=0, sticky="ew")
 
-        self.frame_2_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Frame",
+        self.display_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Student Data",
                                                       fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                                      image=self.chat_image, anchor="w", command=self.frame_2_button_event)
-        self.frame_2_button.grid(row=3, column=0, sticky="ew")
+                                                      image=self.chat_image, anchor="w", command=self.display_button_event)
+        self.display_button.grid(row=3, column=0, sticky="ew")
 
         self.crud_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Add Student",
                                                       fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
@@ -55,7 +67,7 @@ class App(customtkinter.CTk):
                                                       fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                                       image=self.chat_image, anchor="w", command=self.about_us_event)
         self.about_us_button.grid(row=4, column=0, sticky="ew")
-#--------------------------------------------------
+        
         self.appearance_mode_menu = customtkinter.CTkOptionMenu(self.navigation_frame, values=["Light", "Dark", "System"],
                                                                 command=self.change_appearance_mode_event)
         self.appearance_mode_menu.grid(row=6, column=0, padx=20, pady=20, sticky="s")
@@ -84,9 +96,9 @@ class App(customtkinter.CTk):
         self.about_us_frame_label=customtkinter.CTkLabel(master=self.about_us_frame, text="ABOUT US",font=('Century Gothic',45))
         self.about_us_frame_label.place(x=50, y=45)
         self.about_us_frame_label1=customtkinter.CTkLabel(master=self.about_us_frame_1, text='''
-        \nMaintaining manual attendance system is too
+        Maintaining manual attendance system is too
         complex and time-consuming.Smart Attendance 
-        System canbe used to save a lot of time. The 
+        System can be used to save a lot of time. The 
         enrollmentof the student in the system is a 
         one-time process and their face will be stored
         in the database. The Smart Attendance System
@@ -99,16 +111,36 @@ class App(customtkinter.CTk):
         ''',font=('Century Gothic',20))
         self.about_us_frame_label1.place(relx=0.5, rely=0.5, anchor= CENTER)
         
-        # create second frame
-        self.second_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
+        # create display frame
+        self.display_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
 
+        #Treeview
+        import ttkbootstrap as tb
+        from ttkbootstrap.tableview import Tableview
+        l1 = [{"text": "ID", "stretch": False},{"text":"Name","stretch":True},{"text":"Major","stretch":True},{"text":"Starting Year","stretch":True},{"text":"DIV","stretch":True},{"text":"Current Year","stretch":True}]
+        r_set = []
+        def display_data():
+            data = db.reference('Students').get()
+            for index in data:
+                row_values = ("\n","\n","\n","\n","\n","\n")
+                r_set.append(row_values)
+                row_values = (index,data[index]['name'],data[index]['stream'],data[index]['starting_year'],data[index]['div'],data[index]['year'])
+                r_set.append(row_values)
+                row_values = ("\n",)
+        display_data()
+        style = tb.Style()
+        style.configure("Treeview.Heading", font=(None, 22))
+        style.configure("Treeview.columns", font=('Arial',25, 'bold')) 
+        dv = tb.tableview.Tableview(master=self.display_frame,coldata=l1,bootstyle=tb.constants.SUCCESS,rowdata=r_set,searchable=True,pagesize=10,height=20,stripecolor=(tb.Window().style.colors.light, None))
+        dv.pack(expand= True,fill=tb.constants.BOTH)
+        
         # create crud frame
         self.crud_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.crud_frame.grid_columnconfigure(0, weight=1) 
         self.crud_frame_label = customtkinter.CTkLabel(master=self.crud_frame, text="ADD STUDENT",font=('Century Gothic',45))
-        self.crud_frame_label.place(relx=0.12, rely=0.03)
+        self.crud_frame_label.place(relx=0.08, rely=0.15)
         self.crud_frame_1 = customtkinter.CTkFrame(master=self.crud_frame, width= 1120, height = 200)
-        self.crud_frame_1.place(relx=0.9, rely=0.3,anchor = "e")
+        self.crud_frame_1.place(relx=0.5, rely=0.5,anchor = CENTER)
         roll_number = customtkinter.CTkLabel(master=self.crud_frame_1, text="Roll Number : ",font=('Century Gothic',20))
         roll_number.place(x=10, y=25)
         roll_number = StringVar()
@@ -122,7 +154,7 @@ class App(customtkinter.CTk):
         major = customtkinter.CTkLabel(master=self.crud_frame_1, text="Major : ",font=('Century Gothic',20))
         major.place(x=10, y=80)
         major = StringVar()
-        majormenu= customtkinter.CTkOptionMenu(self.crud_frame_1, values=["UNIX", "ANDROID", "WEB DEVELOPMENT", ".NET", "A.I."],height=30,width=212)
+        majormenu= customtkinter.CTkOptionMenu(self.crud_frame_1, values=["UNIX", "ANDROID", "WEB DEV", ".NET", "A.I."],height=30,width=212)
         majormenu.place(x=160, y=80)
         majormenu.set("  Major")
         starting_year = customtkinter.CTkLabel(master=self.crud_frame_1, text="Starting Year : ",font=('Century Gothic',20))
@@ -143,13 +175,45 @@ class App(customtkinter.CTk):
         current_yearmenu= customtkinter.CTkOptionMenu(self.crud_frame_1, values=["1st", "2nd", "3rd", "4th"],height=30,width=177)
         current_yearmenu.place(x=600, y=135)
         current_yearmenu.set("Current Year")
+
+        #button  operations
+        def get_data(roll_number,name,majormenu,starting_yearmenu,divmenu,current_yearmenu):
+            if(roll_number.get()=="" or name.get()=="" or majormenu.get()=="major" or starting_yearmenu.get()=="Starting Year" or divmenu.get()==" Div" or current_yearmenu.get()=="Current Year"):
+                messagebox.showerror(title="Error", message="Please Enter All The Data.")
+            else:
+                print(roll_number.get() ,name.get() ,majormenu.get() ,starting_yearmenu.get() ,divmenu.get() ,current_yearmenu.get())
+                messagebox.showinfo(title="Inserted", message="Data inserted Successfully !")
+        get_data = partial(get_data,roll_number,name,majormenu,starting_yearmenu,divmenu,current_yearmenu)
+
+        def clear_data(roll_number_value,name_value,majormenu,starting_yearmenu,divmenu,current_yearmenu):
+            roll_number_value.delete(0,END)
+            name_value.delete(0,END)
+            majormenu.set("major")
+            starting_yearmenu.set("Starting Year") 
+            divmenu.set("  Div")
+            current_yearmenu.set("Current Year")
+        clear_data = partial(clear_data,roll_number_value,name_value,majormenu,starting_yearmenu,divmenu,current_yearmenu)
+
+        def delete_data(roll_number_value):
+            ref.child("234910").delete()
+            pass
+
+        save_button=customtkinter.CTkButton(self.crud_frame_1,command=get_data, text="Save", font=('Century Gothic',15), fg_color="#0e9104",hover_color="#034a05", corner_radius=20,width=120, height=35, cursor="hand2")
+        save_button.place(x=820, y=55)
+        update_button=customtkinter.CTkButton(self.crud_frame_1, text="Update", font=('Century Gothic',15), fg_color="#f09b46", hover_color="#b35b04", corner_radius=20,width=122, height=35, cursor="hand2")
+        update_button.place(x=950,y=55)
+        clear_button=customtkinter.CTkButton(self.crud_frame_1,command=clear_data, text="Clear", font=('Century Gothic',15), fg_color="#f054c4", hover_color="#7a0259", corner_radius=20,width=120, height=35, cursor="hand2")
+        clear_button.place(x=820, y=125)
+        delete_button=customtkinter.CTkButton(self.crud_frame_1, text="Delete", font=('Century Gothic',15), fg_color="#fa4356", hover_color="#960010",corner_radius=20,width=120, height=35, cursor="hand2")
+        delete_button.place(x=950, y=125)
+
         # select default frame
         self.select_frame_by_name("home")
 
     def select_frame_by_name(self, name):
         # set button color for selected button
         self.home_button.configure(fg_color=("gray75", "gray25") if name == "home" else "transparent")
-        self.frame_2_button.configure(fg_color=("gray75", "gray25") if name == "frame_2" else "transparent")
+        self.display_button.configure(fg_color=("gray75", "gray25") if name == "display" else "transparent")
         self.crud_button.configure(fg_color=("gray75", "gray25") if name == "crud" else "transparent")
         self.about_us_button.configure(fg_color=("gray75", "gray25") if name == "about_us" else "transparent")
 
@@ -158,10 +222,10 @@ class App(customtkinter.CTk):
             self.home_frame.grid(row=0, column=1, sticky="nsew")
         else:
             self.home_frame.grid_forget()
-        if name == "frame_2":
-            self.second_frame.grid(row=0, column=1, sticky="nsew")
+        if name == "display":
+            self.display_frame.grid(row=0, column=1, sticky="nsew")
         else:
-            self.second_frame.grid_forget()
+            self.display_frame.grid_forget()
         if name == "crud":
             self.crud_frame.grid(row=0, column=1, sticky="nsew")
         else:
@@ -176,11 +240,10 @@ class App(customtkinter.CTk):
         call(["python","gui/loginPage.py"])
         self.select_frame_by_name("home")
 
-    def frame_2_button_event(self):
-        self.select_frame_by_name("frame_2")
+    def display_button_event(self):
+        self.select_frame_by_name("display")
 
     def crud_button_event(self):
-        print("crud")
         self.select_frame_by_name("crud")
 
     def change_appearance_mode_event(self, new_appearance_mode):

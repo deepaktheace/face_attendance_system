@@ -28,13 +28,6 @@ def button_function(userName,password):
         messagebox.showwarning("Warning", "Invalid Username or Password")
 
     return
-    '''app.destroy()            # destroy current window and creating new one 
-    w = customtkinter.CTk()  
-    w.geometry("1280x720")
-    w.title('Welcome')
-    l1=customtkinter.CTkLabel(master=w, text="Home Page",font=('Century Gothic',60))
-    l1.place(relx=0.5, rely=0.5,  anchor=tkinter.CENTER)
-    w.mainloop()'''
 
 frame=customtkinter.CTkFrame (master=l1, width=320, height=360)
 frame.place(relx=0.5, rely=0.5, anchor= CENTER)

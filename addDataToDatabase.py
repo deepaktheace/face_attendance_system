@@ -11,7 +11,7 @@ ref = db.reference('Students')
 data = {
     "852741":{
         "name":"Emily Watson",
-        "stream":"BCA",
+        "stream":".NET",
         "starting_year":"2020",
         "total_attendance":"6",
         "div":"B",
@@ -20,16 +20,16 @@ data = {
     },
     "561234":{
         "name":"Elon Musk",
-        "stream":"BCOM",
+        "stream":".NET",
         "starting_year":"2021",
         "total_attendance":"10",
         "div":"A",
-        "year":"2rd",
+        "year":"2nd",
         "last_attendance_time":"2023-02-25 00:54:23",
     },
     "783523":{
         "name":"Mohit Garude",
-        "stream":"WEB DEVELOPMENT",
+        "stream":"WEB DEV",
         "starting_year":"2020",
         "total_attendance":"20",
         "div":"B",

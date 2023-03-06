@@ -86,7 +86,6 @@ while True:
             y1, x2, y2, x1 = y1*4 , x2*4, y2*4, x1*4
             bbox = 55+x1, 162+y1, x2-x1, y2-y1 
             background = cornerRect(background,bbox, rt=0)
-            print(faceDis)
             matchIndex =  np.argmin(faceDis) if np.argmin(faceDis) < 0.5 else 1
             if matches[matchIndex] != True:
                 print("Unknown Face Detected")
