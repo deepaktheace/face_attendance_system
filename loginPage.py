@@ -5,12 +5,11 @@ from PIL import ImageTk, Image
 from functools import partial
 import subprocess  
 
-
 customtkinter.set_appearance_mode("dark") #can set light or dark.
 customtkinter.set_default_color_theme("green") #themes: blue, dark-blue or green
 app=customtkinter.CTk() #creating custom tkinter window
 app.geometry("720x500")
-app.title('Attendance System - Login')
+app.title('Smart Attendance System - Login')
 img1=ImageTk.PhotoImage (Image.open("Resources/pattern.png"))
 l1=customtkinter.CTkLabel(master=app, image=img1)
 l1.pack()

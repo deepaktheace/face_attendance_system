@@ -1,33 +1,19 @@
-import customtkinter 
-import tkinter as tk 
-#from tkinter import ttk, messagebox
-import ttkbootstrap as ttk
-from tkinter import *
-from firebase_admin import credentials,db,initialize_app
-import firebase_admin
-from datetime import datetime
-cred = credentials.Certificate("serviceAccountKey.json")
-initialize_app(cred,{
-    'databaseURL':"https://realtimefaceattendance-53e9b-default-rtdb.firebaseio.com/"
-})
+import openpyxl
+import pandas as pd
+from datetime import date
+from subprocess import Popen
 
-ref = db.reference('Students')
-'''
-data = {
-        "234910":{
-        "name":"Raj Shah demo",
-        "stream":"ANDROID",
-        "starting_year":"2020",
-        "total_attendance":"15",
-        "div":"A",
-        "year":"2nd",
-        "last_attendance_time":"2023-02-25 00:54:23",
-    }
-}
-for key, value in data.items():
-    ref.child(key).set(value)
-'''
+df = pd.read_excel(f"attendance sheets/{date.today().month}-{date.today().year}.xlsx",usecols=[1,8], sheet_name=f"{date.today().day}-{date.today().month}")
+wb = openpyxl.load_workbook(f"attendance sheets/{date.today().month}-{date.today().year}.xlsx")
 
-roll = 234910
-name = "Raj Shah demo"
-print(ref.child(f"{roll}").child(f"{name}").update("update"))
+cur_sheet = wb[f"{date.today().day}-{date.today().month}"]
+
+roll_number = 100234
+for i,index in enumerate(df.iterrows()):
+    if index[1]['ID'] == roll_number:
+      cur_sheet.cell(i+2,9).value = "YES"
+      
+cmd = f"start excel \"attendance sheets/{date.today().month}-{date.today().year}.xlsx\""
+p = Popen(cmd, shell=True)
+
+wb.save(f"attendance sheets/{date.today().month}-{date.today().year} present.xlsx")

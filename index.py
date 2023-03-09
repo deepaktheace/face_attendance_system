@@ -91,6 +91,7 @@ while True:
                 print("Unknown Face Detected")
             if matches[matchIndex]:
                 id = studentIds[matchIndex]
+                print(id)
                 if counter == 0: 
                     counter = 1
         if counter!= 0:
@@ -99,22 +100,24 @@ while True:
                 studentInfo = db.reference(f'Students/{id}').get()
                 print(studentInfo) 
                 blob = bucket.get_blob(f'Images/{id}.png')
-                array = np.frombuffer(blob.download_as_string(),np.uint8)
-                imgStudent = cv.imdecode(array,cv.COLOR_BGRA2BGR)
-                imgStudent = maintain_aspect_ratio_resize(imgStudent,216,216)
-                #update data
-                dateTimeObject = datetime.strptime(studentInfo['last_attendance_time'],"%Y-%m-%d %H:%M:%S")
-                secondsElapsed = (datetime.now()-dateTimeObject).total_seconds()
-                if secondsElapsed >= 39600: 
-                    ref = db.reference(f'Students/{id}')
-                    studentInfo['total_attendance'] = int(studentInfo['total_attendance'])
-                    studentInfo['total_attendance'] += 1
-                    ref.child('total_attendance').set(studentInfo['total_attendance'])
-                    ref.child('last_attendance_time').set(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-                else:
-                    modeType = 3
-                    counter = 0
-                    background[44:44+633,808:808+414] = modeList[modeType]
+                print(blob)
+                if blob != None:
+                    array = np.frombuffer(blob.download_as_string(),np.uint8)
+                    imgStudent = cv.imdecode(array,cv.COLOR_BGRA2BGR)
+                    imgStudent = maintain_aspect_ratio_resize(imgStudent,216,216)
+                    #update data
+                    dateTimeObject = datetime.strptime(studentInfo['last_attendance_time'],"%Y-%m-%d %H:%M:%S")
+                    secondsElapsed = (datetime.now()-dateTimeObject).total_seconds()
+                    if secondsElapsed >= 39600: 
+                        ref = db.reference(f'Students/{id}')
+                        studentInfo['total_attendance'] = int(studentInfo['total_attendance'])
+                        studentInfo['total_attendance'] += 1
+                        ref.child('total_attendance').set(studentInfo['total_attendance'])
+                        ref.child('last_attendance_time').set(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                    else:
+                        modeType = 3
+                        counter = 0
+                        background[44:44+633,808:808+414] = modeList[modeType]
 
             if modeType != 3:
                 
@@ -155,7 +158,7 @@ while True:
         modeType = 0
         counter = 0        
 
-    cv.imshow("face_recognition",background)
+    cv.imshow("Taking Attendance",background)
     if cv.waitKey(1) == ord('q'):
         break
     
