@@ -3,7 +3,7 @@ from tkinter import messagebox
 import customtkinter
 from PIL import ImageTk, Image
 from functools import partial
-import subprocess  
+from subprocess import Popen
 
 customtkinter.set_appearance_mode("dark") #can set light or dark.
 customtkinter.set_default_color_theme("green") #themes: blue, dark-blue or green
@@ -20,8 +20,8 @@ def button_function(userName,password):
     usrName =userName.get()
     passWord=password.get()
     if usrName == "admin" and passWord == "12345":
-        cmd = "python crud/image_example.py"
-        p = subprocess.Popen(cmd, shell=True)
+        cmd = "python crud/crud_system.py"
+        p = Popen(cmd, shell=True)
         app.destroy()
     else:
         messagebox.showwarning("Warning", "Invalid Username or Password")

@@ -48,4 +48,4 @@ for i,index in enumerate(data):
 
 
 workbook.close()
-print("done")
+print(f"{date.today().month}-{date.today().year}")

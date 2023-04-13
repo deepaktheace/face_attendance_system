@@ -22,6 +22,7 @@ class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
 
+
         self.title("Smart Attendance System")
         self.geometry("1280x600")
         
@@ -188,7 +189,7 @@ class App(customtkinter.CTk):
         self.crud_frame_2.place(relx=0.5, rely=0.8,anchor = CENTER)
         def add_image():
             if(roll_number.get()=="" or name.get()=="" or majormenu.get()=="major" or starting_yearmenu.get()=="Starting Year" or divmenu.get()==" Div" or current_yearmenu.get()=="Current Year"):
-                messagebox.showerror(title="Error", message="Please Enter All The Data before adding Image")
+                messagebox.showerror(title="Error", message="Please Enter All The details before adding Image")
             else:
                 print("adding image")
                 key = cv2. waitKey(1)
@@ -240,13 +241,13 @@ class App(customtkinter.CTk):
         add_image_button.place(x=300, y=75)
         train_button=customtkinter.CTkButton(self.crud_frame_2,command=train,image=self.system_image, text="Train System", font=('Century Gothic',25), fg_color="#f09b46", hover_color="#b35b04", corner_radius=20,width=220, height=45, cursor="hand2")
         train_button.place(x=570,y=75)
-        
+            
 
 
         #button  operations
         def get_data(roll_number,name,majormenu,starting_yearmenu,divmenu,current_yearmenu):
             if(roll_number.get()=="" or name.get()=="" or majormenu.get()=="major" or starting_yearmenu.get()=="Starting Year" or divmenu.get()==" Div" or current_yearmenu.get()=="Current Year"):
-                messagebox.showerror(title="Error", message="Please Enter All The Data.")
+                messagebox.showerror(title="Error", message="Please Enter All The details.")
             else:
                 cur_time = f"{datetime.now()}"
                 cur_time = cur_time.split(".")
@@ -286,7 +287,7 @@ class App(customtkinter.CTk):
 
         def update_data(roll_number_value,name_value,majormenu,starting_yearmenu,divmenu,current_yearmenu):
             if(roll_number.get()=="" or name.get()=="" or majormenu.get()=="major" or starting_yearmenu.get()=="Starting Year" or divmenu.get()==" Div" or current_yearmenu.get()=="Current Year"):
-                messagebox.showerror(title="Error", message="Please Enter All The Data.")
+                messagebox.showerror(title="Error", message="Please Enter All The details.")
             else:
                 ref.child(f"{roll_number.get()}").delete()
                 cur_time = f"{datetime.now()}"

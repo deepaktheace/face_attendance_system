@@ -40,10 +40,10 @@ data = {
         "name":"Deepak Gupta",
         "stream":"A.I.",
         "starting_year":"2020",
-        "total_attendance":"6",
+        "total_attendance":"20",
         "div":"B",
         "year":"3rd",
-        "last_attendance_time":"2023-02-25 00:54:23",
+        "last_attendance_time":"2023-03-7 00:54:23",
     }
 }
 
