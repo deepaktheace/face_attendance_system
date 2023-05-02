@@ -1,12 +1,11 @@
 import cv2 as cv 
-import face_recognition
-import pickle
+from face_recognition import face_encodings
+from pickle import dump
 import os
-import firebase_admin
-from firebase_admin import credentials,storage
+from firebase_admin import credentials,storage,initialize_app
 
 cred = credentials.Certificate("serviceAccountKey.json")
-firebase_admin.initialize_app(cred,{
+initialize_app(cred,{
     'databaseURL':"https://realtimefaceattendance-53e9b-default-rtdb.firebaseio.com/",
     'storageBucket':'realtimefaceattendance-53e9b.appspot.com',
 })
@@ -52,8 +51,8 @@ print(studentIds)
 def findEncodings(imgList):
     encodeList = []
     for img in imgList:
-        img = maintain_aspect_ratio_resize(cv.cvtColor(img,cv.COLOR_BGR2RGB),216,216)
-        encode = face_recognition.face_encodings(img)[0]
+        img = cv.cvtColor(img,cv.COLOR_BGR2RGB)
+        encode = face_encodings(img)[0]
         encodeList.append(encode)
 
     return encodeList
@@ -65,6 +64,6 @@ encodeListKnownWithIds = [encodeListKnown,studentIds]
 print("Encoding Complete")
 
 file = open("EncodeFile.p",'wb')
-pickle.dump(encodeListKnownWithIds,file)
+dump(encodeListKnownWithIds,file)
 file.close()
 print("file saved")

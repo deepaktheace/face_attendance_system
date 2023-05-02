@@ -7,7 +7,7 @@ initialize_app(cred,{
     'databaseURL':"https://realtimefaceattendance-53e9b-default-rtdb.firebaseio.com/",
     'storageBucket':'realtimefaceattendance-53e9b.appspot.com',
 })
-workbook = xlsxwriter.Workbook(f"attendance sheets/{date.today().month}-{date.today().year}.xlsx")
+workbook = xlsxwriter.Workbook(f"attendance sheets/{date.today().day}-{date.today().month}-{date.today().year}.xlsx")
 workSheet = workbook.add_worksheet(f"{date.today().day}-{date.today().month}")
 
 #Set header formating
@@ -19,7 +19,7 @@ header_format= workbook.add_format({
 'font_color': '#FFFFFF',
 'font_size' : '15'
 })
-workSheet.set_column('A:I',20)
+workSheet.set_column('A:J',20)
 col_format = workbook.add_format({"valign":"vcenter","align": "center"})
 
 
@@ -34,6 +34,8 @@ workSheet.write(0, 5, "Div",header_format)
 workSheet.write(0, 6, "Current Year",header_format)
 workSheet.write(0, 7, "Total Attendance",header_format)
 workSheet.write(0, 8, "Present",header_format)
+workSheet.write(0, 9, "Present Time",header_format)
+
 
 for i,index in enumerate(data):
     workSheet.write(i+1, 0, int(i+1),col_format)
@@ -45,7 +47,7 @@ for i,index in enumerate(data):
     workSheet.write(i+1, 6, data[index]['year'],col_format)
     workSheet.write(i+1, 7, int(data[index]['total_attendance']),col_format)
     workSheet.write(i+1, 8, "NO",col_format) 
-
+    workSheet.write(i+1, 9, "-",col_format) 
 
 workbook.close()
-print(f"{date.today().month}-{date.today().year}")
+print(f"{date.today().day}-{date.today().month}-{date.today().year}")

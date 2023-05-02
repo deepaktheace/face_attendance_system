@@ -1,17 +1,16 @@
 import face_recognition
 import os 
 import cv2 as cv 
-import numpy as np
+from numpy import frombuffer,uint8,argmin 
 import pickle
 from cvzone import cornerRect
-import firebase_admin
-from firebase_admin import credentials,db,storage
+from firebase_admin import credentials,db,storage,initialize_app
 from time import sleep
 from datetime import datetime
 from subprocess import Popen
 
 cred = credentials.Certificate("serviceAccountKey.json")
-firebase_admin.initialize_app(cred,{
+initialize_app(cred,{
     'databaseURL':"https://realtimefaceattendance-53e9b-default-rtdb.firebaseio.com/",
     'storageBucket':'realtimefaceattendance-53e9b.appspot.com',
 })
@@ -21,7 +20,7 @@ cap = cv.VideoCapture(0)
 cap.set(3,640)
 cap.set(4,480)
 print(cap.read())
-sleep(7)
+sleep(5)
 
 background = cv.imread('Resources/background.png')
 
@@ -87,14 +86,19 @@ while True:
             y1, x2, y2, x1 = y1*4 , x2*4, y2*4, x1*4
             bbox = 55+x1, 162+y1, x2-x1, y2-y1 
             background = cornerRect(background,bbox, rt=0)
-            matchIndex =  np.argmin(faceDis) if np.argmin(faceDis) < 0.5 else 1
+            matchIndex =  argmin(faceDis) if argmin(faceDis) < 0.5 else 1
             if matches[matchIndex] != True:
                 print("Unknown Face Detected")
             if matches[matchIndex]:
                 id = studentIds[matchIndex]
+                idFile = open('ids.p','wb')
+                details = [id,datetime.now().strftime("%H:%M:%S")]
+                pickle.dump(details,idFile)
+                idFile.close()
                 print(id)
                 if counter == 0: 
                     counter = 1
+            
         if counter!= 0:
             # Getting Data
             if counter == 1:
@@ -102,7 +106,7 @@ while True:
                 print(studentInfo) 
                 blob = bucket.get_blob(f'Images/{id}.png')
                 if blob != None:
-                    array = np.frombuffer(blob.download_as_string(),np.uint8)
+                    array = frombuffer(blob.download_as_string(),uint8)
                     imgStudent = cv.imdecode(array,cv.COLOR_BGRA2BGR)
                     imgStudent = maintain_aspect_ratio_resize(imgStudent,216,216)
                     #update data
@@ -122,11 +126,11 @@ while True:
                         background[44:44+633,808:808+414] = modeList[modeType]
 
             if modeType != 3:
-                if 30<counter<40:
+                if 50<counter<70:
                     modeType = 2
                     background[44:44+633,808:808+414] = modeList[modeType]
 
-                if 10<counter<30:   
+                if 5< counter <= 50:
                     modeType = 1
                     cv.putText(background,str(studentInfo['total_attendance']),(861,125),
                             cv.FONT_HERSHEY_COMPLEX,1,(255,255,255),1)
@@ -149,7 +153,7 @@ while True:
             
                 counter+=1
 
-                if counter>36:
+                if counter>=70:
                     counter = 0
                     modeType = 0
                     studentInfo = []
